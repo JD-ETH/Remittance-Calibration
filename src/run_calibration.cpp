@@ -1,14 +1,14 @@
 #include <string>
 #include <iostream>
 #include <exception>
-#include <boost/program_options.hpp>
+#include <pcl/console/parse.h>
 #include <boost/filesystem.hpp>
 #include <glog/logging.h>
-
-#include "pcl/point_types.h"
+#include <pcl/point_cloud.h>
+#include <pcl/point_types.h>
+#include <pcl/PointIndices.h>
 #include "remittance_calib/calibrator.hpp"
 
-namespace bo = boost::program_options;
 namespace bf = boost::filesystem;
 namespace remittance_calib
 {
@@ -26,38 +26,15 @@ struct Options
 Options parseOptions(int argc, char** argv)
 {
     Options options;
-    bo::options_description desc("Allowed Options");
-    desc.add_options()
-        ("help,h", "show help message")
-        ("in,i", boost::program_options::value<std::string>(&options.input_ply), "input ply file ")
-        ("file,f", boost::program_options::value<std::string>(&options.calib_file), "calibration file to output")
-        ("voxel_size,v", boost::progCalibratorram_options::value<double>(&options.voxel_size)->default_value(0.4), "Voxel size ")
-        ("epsilon,e", boost::program_options::value<double>(&options.epsilon)->default_value(0.2), "Random Distrib ")
-        ("std_var,s", boost::program_options::value<double>(&options.std_var)->default_value(5), "Standard variation ")
-        ("disance,d", boost::program_options::value<float>(&options.dist_thresh)->default_value(40.0), "dist thresh ");;
-    bo::variables_map vm;
-    try
-    {
-      bo::store(bo::command_line_parser(argc, argv).options(desc).run(), vm);
-      bo::notify(vm);
-    }
-    catch(bo::invalid_command_line_syntax& e)
-    {
-      throw std::runtime_error(e.what());
-    }
-    catch(bo::unknown_option& e)
-    {
-      throw std::runtime_error(e.what());
-    }
+    pcl::console::parse_argument (argc, argv, "-i", options.input_ply);
+    pcl::console::parse_argument (argc, argv, "-c", options.calib_file);
+
+    pcl::console::parse_argument (argc, argv, "-s", options.std_var);
+    pcl::console::parse_argument (argc, argv, "-e", options.epsilon);
+    pcl::console::parse_argument (argc, argv, "-v", options.voxel_size);
 
 
-
-    //Print help and exit
-    if(vm.count("help") || vm.size() == 0)
-    {
-      std::cout << desc << std::endl;
-      exit(0);
-    }
+    pcl::console::parse_argument (argc, argv, "-d", options.dist_thresh);
 
     return options;
 
@@ -77,7 +54,7 @@ int main(int argc, char** argv)
     calib.loadCloud(cloud);
     auto res = calib.run();
 
-    saveMappings(options.calib_file,res);
+    remittance_calib::saveMappings(options.calib_file,res);
 
 
 

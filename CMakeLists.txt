@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.0)
+cmake_minimum_required(VERSION 2.8.3)
 project(remittance_calib)
 
 ## Compile as C++11, supported in ROS Kinetic and newer
@@ -10,22 +10,23 @@ add_compile_options(-std=c++11)
 find_package(catkin REQUIRED COMPONENTS
   gflags_catkin
   glog_catkin
-  pcl_catkin)
-find_package(Eigen3 REQUIRED)
-find_package(Boost REQUIRED COMPONENTS filesystem )
-
-## Specify additional locations of header files
-## Your package locations should be listed before other locations
-include_directories(
-  include
+  pcl_catkin
+  eigen_catkin
 )
+
+
 catkin_package(
  INCLUDE_DIRS include
  LIBRARIES ${PROJECT_NAME}
- CATKIN_DEPENDS gflags_catkin glog_catkin pcl_catkin
- DEPENDS Boost
+ CATKIN_DEPENDS gflags_catkin glog_catkin pcl_catkin eigen_catkin
 )
+include_directories(
+  include
+  ${catkin_INCLUDE_DIRS}
+)
+
 set(PUBLIC_HPP
+  include/remittance_calib/pcl_point.hpp
   include/remittance_calib/io.hpp
   include/remittance_calib/pdf.hpp
   include/remittance_calib/types.hpp
@@ -38,7 +39,8 @@ set(LIB_CPP
 )
 ## Declare a C++ library
 add_library(${PROJECT_NAME} SHARED ${PUBLIC_HPP} ${LIB_CPP} )
-target_link_libraries(${PROJECT_NAME} Eigen3::Eigen )
+target_link_libraries(${PROJECT_NAME}
+${catkin_LIBRARIES})
 
 # Tests
 catkin_add_gtest(${PROJECT_NAME}_tests
@@ -48,13 +50,13 @@ catkin_add_gtest(${PROJECT_NAME}_tests
 )
 target_link_libraries(${PROJECT_NAME}_tests
   ${PROJECT_NAME}
-  ${catkin_LIBRARIES} Eigen3::Eigen
+  ${catkin_LIBRARIES}
 )
 
 
 ## Executable 1
 add_executable(calibrate src/run_calibration.cpp)
-target_link_libraries(calibrate ${PROJECT_NAME}  ${catkin_LIBRARIES} Eigen3::Eigen  )
+target_link_libraries(calibrate ${PROJECT_NAME}  ${catkin_LIBRARIES} )
 ## Executable 2
 add_executable(correct src/run_correction.cpp)
-target_link_libraries(correct ${PROJECT_NAME}  ${catkin_LIBRARIES} Eigen3::Eigen)
+target_link_libraries(correct ${PROJECT_NAME}  ${catkin_LIBRARIES})

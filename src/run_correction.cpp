@@ -1,14 +1,14 @@
 #include <string>
 #include <iostream>
 #include <exception>
-#include <boost/program_options.hpp>
+#include <pcl/console/parse.h>
 #include <boost/filesystem.hpp>
 #include <glog/logging.h>
-
-#include "pcl/point_types.h"
+#include <pcl/point_cloud.h>
+#include <pcl/point_types.h>
+#include <pcl/PointIndices.h>
 #include "remittance_calib/io.hpp"
 
-namespace bo = boost::program_options;
 namespace bf = boost::filesystem;
 namespace remittance_calib
 {
@@ -27,42 +27,23 @@ struct Options
 Options parseOptions(int argc, char** argv)
 {
     Options options;
-    bo::options_description desc("Allowed Options");
-    desc.add_options()
-        ("help,h", "show help message")
-        ("in,i", boost::program_options::value<std::string>(&options.input_folder), "input folder")
-        ("out,o", boost::program_options::value<std::string>(&options.output_folder), "output folder loc")
-        ("file,f", boost::program_options::value<std::string>(&options.calib_file), "calibration file used for mapping")
-        ("disance,d", boost::program_options::value<float>(&options.dist_thresh)->default_value(40.0), "dist thresh ");
-    bo::variables_map vm;
-    try
-    {
-      bo::store(bo::command_line_parser(argc, argv).options(desc).run(), vm);
-      bo::notify(vm);
-    }
-    catch(bo::invalid_command_line_syntax& e)
-    {
-      throw std::runtime_error(e.what());
-    }
-    catch(bo::unknown_option& e)
-    {
-      throw std::runtime_error(e.what());
-    }
+    pcl::console::parse_argument (argc, argv, "-i", options.input_folder);
+    pcl::console::parse_argument (argc, argv, "-c", options.calib_file);
 
+    pcl::console::parse_argument (argc, argv, "-o", options.output_folder);
 
-
-    //Print help and exit
-    if(vm.count("help") || vm.size() == 0)
-    {
-      std::cout << desc << std::endl;
-      exit(0);
-    }
+    pcl::console::parse_argument (argc, argv, "-d", options.dist_thresh);
 
     if(options.plyFiles.empty())//If we do not have a ply file list then walk the directory and search for them using the prefix if supplied
     {
       bf::path inputFilesystem(options.input_folder);
       if(!is_directory(inputFilesystem))
-        throw std::exception("'" + inputDirectory + "' is not a directory");
+      {
+          LOG(ERROR) << options.input_folder << " missing " ;
+          return options;
+
+      }
+
 
       //Loop thru the entries and extract any ending with .ply and starting with the prefix
       for(boost::filesystem::directory_iterator it(inputFilesystem) ; it != bf::directory_iterator() ; ++it )
@@ -72,11 +53,7 @@ Options parseOptions(int argc, char** argv)
           if(it->path().filename().extension().string() != ".ply")
             continue;
 
-          //Prefix check
-          if(inputPrefix != "" && it->path().filename().string().find(inputPrefix) != 0)
-            continue;
-
-          options.plyFiles.push_back(inputDirectory + it->path().filename().string());
+          options.plyFiles.push_back(options.input_folder + it->path().filename().string());
         }
 
       std::sort(options.plyFiles.begin(), options.plyFiles.end());
@@ -85,7 +62,10 @@ Options parseOptions(int argc, char** argv)
 
 
     if(options.plyFiles.size() == 0)
-      throw std::exception("No plys found");
+    {
+        LOG(ERROR) << "No ply found " ;
+        return options;
+    }
     else
     {
         LOG(INFO) << "Found ply files " << options.plyFiles.size();
@@ -117,14 +97,14 @@ int main(int argc, char** argv)
             point.y = pt.y;
             point.z = pt.z;
             int downsized = static_cast<int>(pt.intensity/256);
-            point.intensity = static_cast<float>(maps.at(pt.ring).at(downsized))/256.0f;
+            point.intensity = static_cast<float>(maps.at(pt.ring)(downsized))/256.0f;
             CHECK(point.intensity < 1.0f) << "Converted intensity must smaller than 1";
             res.push_back(point);
         }
 
 
 
-        if (!remittance_calib::saveCloud(options.output_folder + extractFileName(file),res))
+        if (!remittance_calib::saveCloud(options.output_folder + remittance_calib::extractFileName(file),res))
         {
             LOG(ERROR) << "Save failed for " << file;
         }

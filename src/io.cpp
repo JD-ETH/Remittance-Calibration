@@ -24,7 +24,7 @@ namespace remittance_calib
         // Put in bins
         pcl::VoxelGrid<PointXYZIR> grid;
         grid.setInputCloud(cloud);
-        grid.setLeafSize(voxel_size);
+        grid.setLeafSize(voxel_size,voxel_size,voxel_size);
         grid.setSaveLeafLayout(true);
         grid.setDownsampleAllData(false);
         // pcl::PointCloud<PointXYZIR>::Ptr tmpcloud(new pcl::PointCloud<PointXYZIR>);
@@ -71,7 +71,7 @@ namespace remittance_calib
         }
         mappings = BeamMappings();
         CHECK(ifs.is_open());
-
+        std::string line;
         while (!ifs.eof())
         {
           getline(ifs, line);
@@ -89,5 +89,10 @@ namespace remittance_calib
               mappings.push_back(mapping);
           }
         }
+    }
+    bool saveCloud(const std::string & filename,const pcl::PointCloud<pcl::PointXYZINormal> & cloud)
+    {
+        LOG(INFO) << "Saving under " << filename;
+        return pcl::io::savePCDFileBinary(filename,cloud)!= -1;
     }
 }

@@ -28,7 +28,7 @@ namespace remittance_calib
         // Init cell
         for (auto & cell_prob : cell_model)
         {
-            cell_prob = CellProbability::Ones() * uniform_dist;
+            cell_prob = Eigen::Matrix<double,256,1>::Ones() * uniform_dist;
         }
 
         // Init beam
@@ -67,19 +67,19 @@ namespace remittance_calib
     double Calibrator::m_step()
     {
         auto buffered = beam_model;
-        BeamCounting countings(beam_model.size());
-        for (auto counging: countings) counting.setZero();
+        BeamCountings countings(beam_model.size());
+        for (auto counting: countings) counting.setZero();
 
         for (const auto & m : measurements_)
         {
             countings.at(m.b).col(m.a) += cell_model.at(m.k);
         }
         double diff = 0;
-        for (uint i = 0 ; i < counting.size() ; i++)
+        for (uint i = 0 ; i < countings.size() ; i++)
         {
-            beam_model.at(i) = BeamProbability(counting.at(i));
+            beam_model.at(i) = BeamProbability(countings.at(i));
             diff += (beam_model.at(i).probability-buffered.at(i).probability).norm();
         }
-        return diff/counting.size();
+        return diff/countings.size();
     }
 }

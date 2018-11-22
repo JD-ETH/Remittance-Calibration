@@ -3,8 +3,9 @@
 
 namespace remittance_calib
 {
-    BeamProbability::BeamProbability(double var = 1.0, double epsilon = 0.1)
+    BeamProbability::BeamProbability(double var, double epsilon )
     {
+        probability = Eigen::MatrixXd(256,256);
         for (uint i = 0 ; i < 256u; i++)
         {
             PDF pdf(static_cast<double>(i),var);
@@ -20,9 +21,10 @@ namespace remittance_calib
     {
         BeamMapping result;
         CHECK_EQ(probability.row(0).sum(),1);
+        CHECK_EQ(probability.rows(),256);
         for (uint i = 0 ; i < 256u ; i++)
         {
-            auto val = probability.col(i).maxCoeff(result(i));
+            auto val = probability.col(i).maxCoeff(&result(i));
             LOG(INFO) << " Most likely ground truth at measured " << i <<
                     " is " << result(i) << " at probability " << val;
         }
