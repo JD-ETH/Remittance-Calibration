@@ -8,8 +8,13 @@ namespace remittance_calib
         while (e_step()>convergence_)
         {
             double error = m_step();
-            LOG(INFO) << "Iteration " << ++count << " Has M step error " << error;
+            saveProbability("/home/guo104/data/prob"+std::to_string(count)+".txt",beam_model);
+            LOG(WARNING) << "Iteration " << ++count << " Has M step error " << error;
         }
+
+
+
+
         BeamMappings res ;
         for (const auto & beam : beam_model)
         {
@@ -63,7 +68,7 @@ namespace remittance_calib
         }
 
         double res =  diff/cell_model.size();
-        LOG(INFO) << "Current E STEP averaged error" << res;
+        LOG(WARNING) << "Current E STEP averaged error" << res;
         return res;
     }
 
@@ -80,6 +85,7 @@ namespace remittance_calib
         }
         for (const auto & m : measurements_)
         {
+            
             countings.at(m.b).col(m.a) += cell_model.at(m.k);
         }
         double diff = 0;
@@ -91,7 +97,6 @@ namespace remittance_calib
         }
         double res =  diff/countings.size();
 
-        LOG(INFO) << "Current M STEP averaged error" << res;
         return res;
     }
 }

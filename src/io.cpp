@@ -40,6 +40,10 @@ namespace remittance_calib
             int a = static_cast<int>(pt.intensity/256);
             int b = static_cast<int>(pt.ring);
             int k = find_voxel(grid,pt.x,pt.y,pt.z);
+            if (a<=2 || a>=100)
+            {
+                continue;
+            }
             CHECK(k>=0) << "Did not find corresponding voxel";
             CHECK(a<256 && a >=0) << "Measured intensity is wrong value";
             CHECK(b>=0) << "Ring index is wrong";
@@ -92,6 +96,19 @@ namespace remittance_calib
                   iss >> mapping(i);
               }
               mappings.push_back(mapping);
+          }
+        }
+    }
+
+    void saveProbability(const std::string & filename,  const BeamModel & beam_probs)
+    {
+        std::ofstream file(filename.c_str());
+        if (file.is_open())
+        {
+
+          for (const auto beam:  beam_probs)
+          {
+              file << beam.probability << '\n';
           }
         }
     }

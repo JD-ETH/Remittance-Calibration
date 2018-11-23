@@ -54,10 +54,9 @@ int main(int argc, char** argv)
     LOG(INFO) << "Loaded cloud size " << cloud->size();
     calib.loadCloud(cloud);
     auto res = calib.run();
-
+    LOG(INFO) << "Converged";
     remittance_calib::saveMappings(options.calib_file,res);
-
-
+    
 
 
     return 0;

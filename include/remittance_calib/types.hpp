@@ -24,7 +24,7 @@ struct BeamProbability
 
     BeamProbability(double var = 1.0, double epsilon = 0.1);
 
-    BeamProbability(BeamCounting in):probability(in){normalize();}
+    BeamProbability(BeamCounting in);
 
     Eigen::MatrixXd probability;
 

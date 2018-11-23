@@ -15,7 +15,7 @@ namespace remittance_calib
         BeamMappings run();
         void loadCloud(pcl::PointCloud<PointXYZIR>::Ptr cloud);
     private:
-        static constexpr double convergence_ = 1e-9 ;
+        static constexpr double convergence_ = 1e-7 ;
         static constexpr double uniform_dist = 1.0/256.0 ;
         BeamModel beam_model;
         CellModel cell_model;

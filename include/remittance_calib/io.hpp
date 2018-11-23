@@ -37,6 +37,8 @@ namespace remittance_calib
 
      void saveMappings(const std::string & filename, const BeamMappings & mappings);
      void loadMappings(const std::string & filename, BeamMappings & mappings);
+     void saveProbability(const std::string & filename, const BeamModel & beam_probs);
+     // void saveBeamcounting(const std::string & filename, const BeamCountings & counts)
 
 }
 #endif
