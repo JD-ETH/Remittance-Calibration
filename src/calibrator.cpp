@@ -36,17 +36,18 @@ namespace remittance_calib
         for (const auto & m: measurements_) num_of_rings = std::max(num_of_rings,m.b);
         num_of_rings ++;
         LOG(INFO) << "Number of beams " << num_of_rings;
-        
+
         for (int beam_i = 0 ; beam_i < num_of_rings ; beam_i++)
         {
             beam_model.emplace_back(std_var,epsilon);
         }
 
-
+        LOG(INFO) << "Initialization completed";
     }
 
     double Calibrator::e_step()
     {
+        LOG(INFO) << "RUNNING E STEP " ;
         auto buffered = cell_model;
         for (const auto & m : measurements_)
         {
@@ -61,16 +62,22 @@ namespace remittance_calib
             diff += (cell_model.at(i)-buffered.at(i)).norm();
         }
 
-        return diff/cell_model.size();
-
+        double res =  diff/cell_model.size();
+        LOG(INFO) << "Current E STEP averaged error" << res;
+        return res;
     }
 
     double Calibrator::m_step()
     {
+
+        LOG(INFO) << "RUNNING M STEP " ;
         auto buffered = beam_model;
         BeamCountings countings(beam_model.size());
-        for (auto counting: countings) counting.setZero();
-
+        for (auto & counting: countings)
+        {
+            counting = BeamCounting(256,256);
+            counting.setZero();
+        }
         for (const auto & m : measurements_)
         {
             countings.at(m.b).col(m.a) += cell_model.at(m.k);
@@ -78,9 +85,13 @@ namespace remittance_calib
         double diff = 0;
         for (uint i = 0 ; i < countings.size() ; i++)
         {
+            CHECK_EQ(countings.at(i).rows(), 256);
             beam_model.at(i) = BeamProbability(countings.at(i));
             diff += (beam_model.at(i).probability-buffered.at(i).probability).norm();
         }
-        return diff/countings.size();
+        double res =  diff/countings.size();
+
+        LOG(INFO) << "Current M STEP averaged error" << res;
+        return res;
     }
 }

@@ -32,9 +32,10 @@ struct BeamProbability
 
     void normalize()
     {
+        CHECK_EQ(probability.rows(),256);
         Eigen::VectorXd row_wise_sum = probability.rowwise().sum();
         probability.array().colwise() /= row_wise_sum.array();
-        CHECK_EQ(probability.row(0).sum(),1);
+        CHECK_NEAR(probability.row(0).sum(),1.0, 1e-4);
     }
 
     CellProbability at(int measured){ return probability.col(measured);}

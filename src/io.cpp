@@ -34,6 +34,7 @@ namespace remittance_calib
 
         // Now put in measurement
         Measurements results;
+        //std::vector<size_t> counter(257,0);
         for (const auto pt : cloud->points)
         {
             int a = static_cast<int>(pt.intensity/256);
@@ -43,9 +44,11 @@ namespace remittance_calib
             CHECK(a<256 && a >=0) << "Measured intensity is wrong value";
             CHECK(b>=0) << "Ring index is wrong";
             results.emplace_back(a,b,k);
+            // counter.at(a)++;
         }
         LOG(INFO) << "Gathered measurements " << results.size();
         cloud.swap(tmpcloud);
+        //for (int i = 0 ; i < 257 ;  i++) LOG(INFO) << "Measuring " << i << " : " <<counter.at(i) << " times";
         return results;
 
     }
