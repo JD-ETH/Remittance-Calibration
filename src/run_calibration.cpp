@@ -51,6 +51,7 @@ int main(int argc, char** argv)
 
     remittance_calib::Calibrator calib(options.voxel_size, options.std_var, options.epsilon);
     auto cloud = remittance_calib::loadCloud(options.input_ply,options.dist_thresh);
+    LOG(INFO) << "Loaded cloud size " << cloud->size();
     calib.loadCloud(cloud);
     auto res = calib.run();
 

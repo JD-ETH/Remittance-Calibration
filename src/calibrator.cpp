@@ -21,8 +21,7 @@ namespace remittance_calib
     void Calibrator::loadCloud(pcl::PointCloud<PointXYZIR>::Ptr cloud)
     {
         measurements_ = loadMeasurement(cloud, voxel_size);
-
-        LOG(INFO) << "Downsampled size of voxel " << cloud->size();
+        LOG(INFO) << "Loaded measurements. Downsampled size of voxel " << cloud->size();
         cell_model.resize(cloud->size());
 
         // Init cell
@@ -30,12 +29,14 @@ namespace remittance_calib
         {
             cell_prob = Eigen::Matrix<double,256,1>::Ones() * uniform_dist;
         }
+        LOG(INFO) << "Initialized Cell Probability as uniform " << cell_model.size();
 
         // Init beam
         int num_of_rings = 0;
         for (const auto & m: measurements_) num_of_rings = std::max(num_of_rings,m.b);
         num_of_rings ++;
         LOG(INFO) << "Number of beams " << num_of_rings;
+        
         for (int beam_i = 0 ; beam_i < num_of_rings ; beam_i++)
         {
             beam_model.emplace_back(std_var,epsilon);

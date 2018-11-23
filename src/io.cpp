@@ -17,18 +17,20 @@ namespace remittance_calib
             }
         }
         LOG(INFO) << " From original points " << cloud->size() << " now filtered " << res->size();
+        return res;
     }
     // Cut the bull shit and assume its PointComplete
     Measurements loadMeasurement(pcl::PointCloud<PointXYZIR>::Ptr cloud, double voxel_size)
     {
+        CHECK_NOTNULL(cloud);
         // Put in bins
         pcl::VoxelGrid<PointXYZIR> grid;
         grid.setInputCloud(cloud);
         grid.setLeafSize(voxel_size,voxel_size,voxel_size);
         grid.setSaveLeafLayout(true);
         grid.setDownsampleAllData(false);
-        // pcl::PointCloud<PointXYZIR>::Ptr tmpcloud(new pcl::PointCloud<PointXYZIR>);
-        grid.filter(*cloud);
+        pcl::PointCloud<PointXYZIR>::Ptr tmpcloud(new pcl::PointCloud<PointXYZIR>);
+        grid.filter(*tmpcloud);
 
         // Now put in measurement
         Measurements results;
@@ -43,7 +45,7 @@ namespace remittance_calib
             results.emplace_back(a,b,k);
         }
         LOG(INFO) << "Gathered measurements " << results.size();
-
+        cloud.swap(tmpcloud);
         return results;
 
     }

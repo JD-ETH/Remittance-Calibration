@@ -33,7 +33,7 @@ struct PointXYZIR
   		(float, x, x)
   		(float, y, y)
   		(float, z, z)
-	    (unsigned char, ring, ring)
+	    (unsigned char, ring, ring_number)
   		(unsigned short, intensity, intensity)
         (float, range, range)
   )
