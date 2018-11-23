@@ -20,7 +20,7 @@ namespace remittance_calib
         return res;
     }
     // Cut the bull shit and assume its PointComplete
-    Measurements loadMeasurement(pcl::PointCloud<PointXYZIR>::Ptr cloud, double voxel_size)
+    Measurements loadMeasurement(pcl::PointCloud<PointXYZIR>::Ptr & cloud, double voxel_size)
     {
         CHECK_NOTNULL(cloud);
         // Put in bins
