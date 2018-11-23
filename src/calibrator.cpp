@@ -54,17 +54,42 @@ namespace remittance_calib
     {
         LOG(INFO) << "RUNNING E STEP " ;
         auto buffered = cell_model;
+        for (auto & cell : cell_model) cell.setZero();
+        int counter = 0 ;
         for (const auto & m : measurements_)
         {
-            CHECK(m.k < cell_model.size()) << " Index too high";
-            cell_model.at(m.k) += beam_model.at(m.b).at(m.a);
-        }
 
+            CHECK(m.k < cell_model.size()) << " Index too high";
+            cell_model.at(m.k) += beam_model.at(m.b).atLog(m.a);
+
+        }
+        for (auto & cell : cell_model)
+        {
+            auto val = cell.maxCoeff();
+            for (uint i = 0 ; i < 256u ; i++)
+            {
+                if (cell(i)-val >=std::log(precision_)-std::log(256))
+                {
+                    cell(i) = std::exp(cell(i)-val);
+                }
+                else
+                {
+                    cell(i) = 0;
+                }
+            }
+        }
         double diff = 0.0;
         for (int i = 0 ; i < cell_model.size(); i++)
         {
             cell_model.at(i) /= cell_model.at(i).sum(); // Average
-            diff += (cell_model.at(i)-buffered.at(i)).norm();
+            double err = (cell_model.at(i)-buffered.at(i)).norm();
+            if (err != err)
+            {
+                LOG(ERROR) << cell_model.at(i) ;
+
+                throw std::runtime_error(" Illegal value");
+            }
+            diff += err;
         }
 
         double res =  diff/cell_model.size();
@@ -85,7 +110,7 @@ namespace remittance_calib
         }
         for (const auto & m : measurements_)
         {
-            
+
             countings.at(m.b).col(m.a) += cell_model.at(m.k);
         }
         double diff = 0;

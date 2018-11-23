@@ -26,7 +26,7 @@ struct BeamProbability
 
     BeamProbability(BeamCounting in);
 
-    Eigen::MatrixXd probability;
+    Eigen::MatrixXd probability, log_probability;
 
     BeamMapping getMapping() const;
 
@@ -38,7 +38,7 @@ struct BeamProbability
         CHECK_NEAR(probability.row(0).sum(),1.0, 1e-4);
     }
 
-    CellProbability at(int measured){ return probability.col(measured);}
+    CellProbability atLog(int measured){ return log_probability.col(measured);}
 };
 
 using BeamModel = std::vector<BeamProbability>;

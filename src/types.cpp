@@ -15,6 +15,8 @@ namespace remittance_calib
         // probability.array().rowwise() /= col_wise_sum.array();
         // CHECK_NEAR(probability.col(0).sum(),1.0, 1e-4);
         normalize();
+        log_probability = probability.array().log().matrix();
+
     }
     BeamProbability::BeamProbability(double var, double epsilon )
     {
@@ -28,6 +30,7 @@ namespace remittance_calib
             }
         }
         normalize();
+        log_probability = probability.array().log().matrix();
     }
 
     BeamMapping BeamProbability::getMapping() const
@@ -39,8 +42,8 @@ namespace remittance_calib
         {
             auto val = probability.col(i).maxCoeff(&result(i));
             if (val == 0) result(i) = i ;
-            LOG(INFO) << " Most likely ground truth at measured " << i <<
-                    " is " << result(i) << " at probability " << val;
+            // LOG(INFO) << " Most likely ground truth at measured " << i <<
+            //         " is " << result(i) << " at probability " << val;
         }
         return result;
     }

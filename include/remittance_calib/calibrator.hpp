@@ -1,5 +1,7 @@
 #ifndef REMITTANCE_CALIB_CALIB_HPP_
 #define REMITTANCE_CALIB_CALIB_HPP_
+
+#include <exception>
 #include "remittance_calib/types.hpp"
 
 #include "remittance_calib/io.hpp"
@@ -16,6 +18,7 @@ namespace remittance_calib
         void loadCloud(pcl::PointCloud<PointXYZIR>::Ptr cloud);
     private:
         static constexpr double convergence_ = 1e-7 ;
+        static constexpr double precision_ = 1e-10 ;
         static constexpr double uniform_dist = 1.0/256.0 ;
         BeamModel beam_model;
         CellModel cell_model;
