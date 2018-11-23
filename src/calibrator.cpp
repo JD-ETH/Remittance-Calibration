@@ -5,11 +5,17 @@ namespace remittance_calib
     BeamMappings Calibrator::run()
     {
         int count = 0;
-        while (e_step()>convergence_)
+        while (e_step()>convergence_ && count < 5)
         {
             double error = m_step();
             saveProbability("/home/guo104/data/prob"+std::to_string(count)+".txt",beam_model);
             LOG(WARNING) << "Iteration " << ++count << " Has M step error " << error;
+            BeamMappings res ;
+            for (const auto & beam : beam_model)
+            {
+                res.emplace_back(beam.getMapping());
+            }
+            saveMappings("/home/guo104/data/map"+std::to_string(count)+".txt",res);
         }
 
 
