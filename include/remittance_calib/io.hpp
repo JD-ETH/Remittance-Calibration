@@ -6,7 +6,7 @@
 #include <string>
 #include <pcl/io/ply_io.h>
 #include <pcl/io/pcd_io.h>
-
+#include <pcl/registration/icp.h>
 #include "remittance_calib/types.hpp"
 
 #include "remittance_calib/pcl_point.hpp"
@@ -15,7 +15,7 @@ namespace remittance_calib
     pcl::PointCloud<PointXYZIR>::Ptr loadCloud(const std::string & filename, float dist_thresh = 40.0);
     // Load from point complete
     pcl::PointCloud<PointFull>::Ptr loadFullCloud(const std::string & filename, float dist_thresh = 40.0);
-
+    bool saveCloudAsFull(const std::string & filename,const pcl::PointCloud<PointFull> & cloud);
     pcl::PointCloud<PointFull>::Ptr loadPly_PointFull_manual(std::string file,float dist_thresh = 40.0);
 
     Measurements loadMeasurement(pcl::PointCloud<PointXYZIR>::Ptr & cloud, double voxel_size=0.25);
@@ -38,6 +38,7 @@ namespace remittance_calib
        }
        return filename.substr(begin+1,end-begin-1);
      }
+     void align(pcl::PointCloud<PointFull>::Ptr ref,pcl::PointCloud<PointFull>::Ptr src, Eigen::Matrix4f hint );
 
      void saveMappings(const std::string & filename, const BeamMappings & mappings);
      void loadMappings(const std::string & filename, BeamMappings & mappings);

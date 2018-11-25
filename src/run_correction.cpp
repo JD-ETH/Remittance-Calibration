@@ -22,6 +22,7 @@ struct Options
     std::string calib_file; //< File used for mapping
     float dist_thresh, correct_thresh; // thresh
     std::vector<std::string> plyFiles; //< Points needs to be fixed
+    int skip = 0;
 };
 
 Options parseOptions(int argc, char** argv)
@@ -31,7 +32,7 @@ Options parseOptions(int argc, char** argv)
     pcl::console::parse_argument (argc, argv, "-c", options.calib_file);
 
     pcl::console::parse_argument (argc, argv, "-o", options.output_folder);
-
+    pcl::console::parse_argument (argc, argv, "-s", options.skip);
     pcl::console::parse_argument (argc, argv, "-d", options.dist_thresh);
     pcl::console::parse_argument (argc, argv, "-r", options.correct_thresh);
 
@@ -86,6 +87,12 @@ int main(int argc, char** argv)
 
     remittance_calib::BeamMappings maps;
     remittance_calib::loadMappings(options.calib_file,maps);
+
+    if (options.skip > 0)
+    {
+        remittance_calib::BeamMappings skipped(maps.begin()+options.skip, maps.end());
+        skipped.swap(maps);
+    }
     LOG(INFO) << "Loading complete in total " << maps.size();
     for (const auto file : options.plyFiles)
     {

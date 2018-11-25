@@ -24,6 +24,37 @@ namespace remittance_calib
         LOG(INFO) << " From original points " << cloud->size() << " now filtered " << res->size();
         return res;
     }
+    void align(pcl::PointCloud<PointFull>::Ptr ref,pcl::PointCloud<PointFull>::Ptr src, Eigen::Matrix4f hint )
+    {
+        pcl::PointCloud<PointFull>::Ptr ref_down(new pcl::PointCloud<PointFull>);
+        pcl::PointCloud<PointFull>::Ptr src_down(new pcl::PointCloud<PointFull>);
+
+        pcl::PointCloud<PointFull>::Ptr tmp(new pcl::PointCloud<PointFull>);
+        pcl::VoxelGrid<PointFull> grid;
+        grid.setLeafSize(0.25,0.25,0.25);
+        grid.setInputCloud(src);
+        grid.filter(*src_down);
+        grid.setInputCloud(ref);
+        grid.filter(*ref_down);
+
+        // Run the alignement
+        pcl::IterativeClosestPoint<PointFull, PointFull> reg;
+        reg.setMaxCorrespondenceDistance(2.0);
+        reg.setMaximumIterations (30);
+        // Set the maximum distance between two correspondences (src<->tgt) to 10cm
+        // Note: adjust this based on the size of your datasets
+        reg.setInputSource(src_down);
+        reg.setInputTarget(ref_down);
+        reg.align(*tmp,hint);
+
+        pcl::transformPointCloud(*src,*src,hint);
+        for (auto & pt : src->points) pt.ring += 16;
+
+
+        LOG(INFO) << "Alignment has converged:" << reg.hasConverged() << " score: " <<
+          reg.getFitnessScore() << std::endl;
+
+    }
     pcl::PointCloud<PointXYZIR>::Ptr loadCloud(const std::string & filename, float dist_thresh)
     {
         pcl::PointCloud<PointXYZIR>::Ptr cloud(new pcl::PointCloud<PointXYZIR>);
@@ -40,7 +71,7 @@ namespace remittance_calib
         return res;
     }
     // Cut the bull shit and assume its PointComplete
-    Measurements loadMeasurement(pcl::PointCloud<PointXYZIR>::Ptr & cloud, double voxel_size)
+    Measurements loadMeasurement(pcl::PointCloud<PointXYZIR>::Ptr & cloud,double voxel_size)
     {
         CHECK_NOTNULL(cloud);
         // Put in bins
@@ -139,6 +170,11 @@ namespace remittance_calib
     {
         LOG(INFO) << "Saving under " << filename;
         return pcl::io::savePCDFileBinary(filename,cloud)!= -1;
+    }
+    bool saveCloudAsFull(const std::string & filename,const pcl::PointCloud<PointFull> & cloud)
+    {
+        LOG(INFO) << "Saving under " << filename;
+        return pcl::io::savePLYFileBinary(filename,cloud)!= -1;
     }
     pcl::PointCloud<PointFull>::Ptr loadPly_PointFull_manual(std::string file,float dist_thresh){
     /*

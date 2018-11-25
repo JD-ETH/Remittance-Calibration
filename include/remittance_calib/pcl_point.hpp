@@ -5,6 +5,9 @@
 #include <pcl/point_types.h>
 #include <pcl/filters/impl/voxel_grid.hpp>
 #include <pcl/impl/pcl_base.hpp>
+#include <pcl/search/impl/kdtree.hpp>
+#include <pcl/kdtree/impl/kdtree_flann.hpp>
+#include <pcl/search/impl/search.hpp>
 #include <pcl/PointIndices.h>
 #include <pcl/pcl_base.h>
 // PCL point type used here
@@ -33,7 +36,7 @@ struct PointXYZIR
   		(float, x, x)
   		(float, y, y)
   		(float, z, z)
-	    (unsigned char, ring, ring_number)
+	    (unsigned char, ring, ring)
   		(unsigned short, intensity, intensity)
         (float, range, range)
   )
@@ -75,7 +78,7 @@ struct PointXYZIR
     		(float, y, y)
     		(float, z, z)
   	        (unsigned char, planarity, planarity)
-  	        (unsigned char, ring, ring)
+  	        (unsigned char, ring, ring_number)
     		(unsigned short, intensity, intensity)
     		(float, incidence_angle, incidence_angle)
     		(float, range, range)

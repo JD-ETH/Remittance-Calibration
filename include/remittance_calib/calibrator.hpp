@@ -18,11 +18,12 @@ namespace remittance_calib
                 voxel_size(voxel_size), std_var(std_var), epsilon(epsilon){}
         BeamMappings run();
         void loadCloud(pcl::PointCloud<PointXYZIR>::Ptr cloud);
+        void addCloud(pcl::PointCloud<PointXYZIR>::Ptr cloud, Eigen::Matrix4f T = Eigen::Matrix4f::Identity());
     private:
         static constexpr double convergence_ = 1e-7 ;
         static constexpr double precision_ = 1e-10 ;
-
         static constexpr double uniform_dist = 1.0/MAX_REMITTANCE_READING ;
+
         BeamModel beam_model;
         CellModel cell_model;
         double e_step();
@@ -31,6 +32,8 @@ namespace remittance_calib
         double std_var ;
         double epsilon ;
         Measurements measurements_;
+
+        pcl::PointCloud<PointXYZIR>::Ptr ref_cloud_;
     };
 }
 

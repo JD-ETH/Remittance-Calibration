@@ -34,6 +34,7 @@ namespace remittance_calib
         measurements_ = loadMeasurement(cloud, voxel_size);
         LOG(INFO) << "Loaded measurements. Downsampled size of voxel " << cloud->size();
         cell_model.resize(cloud->size());
+        ref_cloud_ = cloud;
 
         // Init cell
         for (auto & cell_prob : cell_model)
@@ -55,6 +56,7 @@ namespace remittance_calib
 
         LOG(INFO) << "Initialization completed";
     }
+
 
     double Calibrator::e_step()
     {

@@ -60,3 +60,6 @@ target_link_libraries(calibrate ${PROJECT_NAME}  ${catkin_LIBRARIES} )
 ## Executable 2
 add_executable(correct src/run_correction.cpp)
 target_link_libraries(correct ${PROJECT_NAME}  ${catkin_LIBRARIES})
+## Executable 2
+add_executable(merge src/merge_pointclouds.cpp)
+target_link_libraries(merge ${PROJECT_NAME}  ${catkin_LIBRARIES})
