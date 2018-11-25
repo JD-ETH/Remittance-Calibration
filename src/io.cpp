@@ -3,8 +3,28 @@
 namespace remittance_calib
 {
 
+    pcl::PointCloud<PointFull>::Ptr loadFullCloud(const std::string & filename, float dist_thresh )
+    {
 
-    pcl::PointCloud<PointXYZIR>::Ptr loadCloud(const std::string & filename, double dist_thresh)
+        if (extractFileName(filename).substr(0,6) == "result")
+        {
+            return loadPly_PointFull_manual(filename,dist_thresh);
+        }
+
+        pcl::PointCloud<PointFull>::Ptr cloud(new pcl::PointCloud<PointFull>);
+        pcl::io::loadPLYFile(filename,*cloud);
+        pcl::PointCloud<PointFull>::Ptr res(new pcl::PointCloud<PointFull>);
+        for (const auto & pt : cloud->points)
+        {
+            if (pt.range <= dist_thresh )
+            {
+                res->push_back(pt);
+            }
+        }
+        LOG(INFO) << " From original points " << cloud->size() << " now filtered " << res->size();
+        return res;
+    }
+    pcl::PointCloud<PointXYZIR>::Ptr loadCloud(const std::string & filename, float dist_thresh)
     {
         pcl::PointCloud<PointXYZIR>::Ptr cloud(new pcl::PointCloud<PointXYZIR>);
         pcl::io::loadPLYFile(filename,*cloud);
@@ -63,7 +83,7 @@ namespace remittance_calib
         std::ofstream file(filename.c_str());
         if (file.is_open())
         {
-          file << mappings.size() << "\n";
+          file << mappings.size() << " " << mappings.at(0).cols() <<"\n";
           for (const auto mapping:  mappings)
           {
               file << mapping << '\n';
@@ -81,23 +101,26 @@ namespace remittance_calib
         mappings = BeamMappings();
         CHECK(ifs.is_open());
         std::string line;
-        while (!ifs.eof())
-        {
+        getline(ifs, line);
+        std::istringstream iss(line);
+        int num_of_rings, size_of_mapping;
+        iss>>num_of_rings;
+        iss>> size_of_mapping;
+        LOG(INFO) << " There are " << num_of_rings << "rings and correspondences" << size_of_mapping;
+      for (int k = 0 ; k < num_of_rings ; k++)
+      {
           getline(ifs, line);
-          if (line.empty()) continue;
           std::istringstream iss(line);
-          int num_of_rings;
-          iss>>num_of_rings;
-          for (int k = 0 ; k < num_of_rings ; k++)
+
+          BeamMapping mapping(size_of_mapping);
+          for (int i = 0 ; i < size_of_mapping ; i++)
           {
-              BeamMapping mapping;
-              for (int i = 0 ; i < 256u ; i++)
-              {
-                  iss >> mapping(i);
-              }
-              mappings.push_back(mapping);
+              iss >> mapping(i);
+
           }
-        }
+          mappings.push_back(mapping);
+      }
+
     }
 
     void saveProbability(const std::string & filename,  const BeamModel & beam_probs)
@@ -117,4 +140,57 @@ namespace remittance_calib
         LOG(INFO) << "Saving under " << filename;
         return pcl::io::savePCDFileBinary(filename,cloud)!= -1;
     }
+    pcl::PointCloud<PointFull>::Ptr loadPly_PointFull_manual(std::string file,float dist_thresh){
+    /*
+
+      Thus we follow this sequence and hope nothing ever changes or breaks
+    */
+      size_t numOfVertices;
+      std::string::size_type sz;   // alias of size_t
+      std::ifstream inputPly;
+      inputPly.open(file.c_str(),std::ios::binary);
+      if (!inputPly.is_open())
+      {
+        std::cerr << "Couldn't open " << file << '\n';
+        exit(1);
+      }
+
+      std::string line;
+      while (line.find("element vertex") != 0){
+        getline(inputPly,line);
+      }
+      numOfVertices = std::stol(line.substr(15),&sz);
+
+      getline(inputPly,line);
+
+      while (line.compare("end_header") != 0){
+    		getline(inputPly, line);
+      }
+
+      LOG(WARNING) << "Manually parsing";
+
+      // Skip through the end of header
+      pcl::PointCloud<PointFull>::Ptr cloud (new pcl::PointCloud<PointFull>());
+      PointFull single_point;
+      // BAD PRACTICE reinterpret_cast means force interpret
+      while (numOfVertices--){
+
+        inputPly.read(reinterpret_cast<char*>( &single_point.x), sizeof(float));//std::cout << float(x)<< " ";
+        inputPly.read(reinterpret_cast<char*>( &single_point.y), sizeof(float));//std::cout << float(y)<< " ";
+        inputPly.read(reinterpret_cast<char*>( &single_point.z), sizeof(float));//std::cout << float(z)<< " ";
+        inputPly.read((char *) &single_point.intensity, sizeof(single_point.intensity));// std::cout << int(single_point.intensity) << " ";
+        inputPly.read((char *) &single_point.incidence_angle, sizeof(single_point.incidence_angle));//std::cout << (single_point.incidence_angle)<< " ";
+
+        inputPly.read((char *) &single_point.range, sizeof(single_point.range));//std::cout << (single_point.range)<< " ";
+        inputPly.read((char *) &single_point.planarity, sizeof(single_point.planarity));//std::cout << (int)single_point.planarity << " ";
+        inputPly.read((char *) &single_point.ring, sizeof(single_point.ring));//std::cout << int(single_point.ring)<< " ";
+        inputPly.read((char *) &single_point.time, sizeof(single_point.time));//std::cout << single_point.time << " \n";
+
+        if (single_point.range <= dist_thresh)
+            cloud->push_back(single_point);
+      }
+      return cloud;
+
+    }
+
 }

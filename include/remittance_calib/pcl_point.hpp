@@ -38,6 +38,49 @@ struct PointXYZIR
         (float, range, range)
   )
 
+  struct PointFull
+    {
+      // Standard Point
+      PCL_ADD_POINT4D;
+
+    	union
+    	{
+        float data_c[4]; // ensuring SSE alignment
+    		struct
+    		{
+    			unsigned char ring;  // This is 8 bit, number of ring
+    			unsigned short intensity; // This is 16 bit
+          unsigned char planarity;  // This is 8 bit, number of ring
+    			float incidence_angle; // This is 32 bit
+    			float range; // This is 32 bit again
+    		};
+    	};
+
+
+    	union
+    	{
+    		struct
+    		{
+    			double time;
+    		};
+    		double data_t[2]; // ensuring SSE alignment
+    	};
+
+    	EIGEN_MAKE_ALIGNED_OPERATOR_NEW   // make sure our new allocators are aligned
+    }EIGEN_ALIGN16;                    // enforce SSE padding for correct memory alignment
+
+  // registration of the point (apparently: actual declaration of the point)
+    POINT_CLOUD_REGISTER_POINT_STRUCT(PointFull,
+    		(float, x, x)
+    		(float, y, y)
+    		(float, z, z)
+  	        (unsigned char, planarity, planarity)
+  	        (unsigned char, ring, ring)
+    		(unsigned short, intensity, intensity)
+    		(float, incidence_angle, incidence_angle)
+    		(float, range, range)
+    		(double, time, time)
+    )
 
 
 #endif

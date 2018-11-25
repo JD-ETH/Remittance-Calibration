@@ -12,8 +12,12 @@
 #include "remittance_calib/pcl_point.hpp"
 namespace remittance_calib
 {
-    pcl::PointCloud<PointXYZIR>::Ptr loadCloud(const std::string & filename, double dist_thresh = 40.0);
+    pcl::PointCloud<PointXYZIR>::Ptr loadCloud(const std::string & filename, float dist_thresh = 40.0);
     // Load from point complete
+    pcl::PointCloud<PointFull>::Ptr loadFullCloud(const std::string & filename, float dist_thresh = 40.0);
+
+    pcl::PointCloud<PointFull>::Ptr loadPly_PointFull_manual(std::string file,float dist_thresh = 40.0);
+
     Measurements loadMeasurement(pcl::PointCloud<PointXYZIR>::Ptr & cloud, double voxel_size=0.25);
     // Save to point XYZINormal for experiments
     bool saveCloud(const std::string & filename,const pcl::PointCloud<pcl::PointXYZINormal> & cloud);

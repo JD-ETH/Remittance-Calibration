@@ -6,6 +6,8 @@
 
 #include "remittance_calib/io.hpp"
 
+static constexpr int MAX_REMITTANCE_READING = 100;
+
 namespace remittance_calib
 {
     class Calibrator
@@ -19,7 +21,8 @@ namespace remittance_calib
     private:
         static constexpr double convergence_ = 1e-7 ;
         static constexpr double precision_ = 1e-10 ;
-        static constexpr double uniform_dist = 1.0/256.0 ;
+
+        static constexpr double uniform_dist = 1.0/MAX_REMITTANCE_READING ;
         BeamModel beam_model;
         CellModel cell_model;
         double e_step();

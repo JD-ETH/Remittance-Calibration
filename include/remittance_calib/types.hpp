@@ -13,7 +13,7 @@ namespace remittance_calib
 {
 using CellProbability = Eigen::VectorXd;
 using BeamCounting = Eigen::MatrixXd;
-using BeamMapping = Eigen::VectorXi; //< Map to 0 till 255
+using BeamMapping = Eigen::RowVectorXi; //< Map to 0 till 255
 
 
 // Rows Measured 0 till 255
@@ -22,7 +22,7 @@ struct BeamProbability
 {
 
 
-    BeamProbability(double var = 1.0, double epsilon = 0.1);
+    BeamProbability(int size, double var = 1.0, double epsilon = 0.1);
 
     BeamProbability(BeamCounting in);
 
@@ -32,7 +32,7 @@ struct BeamProbability
 
     void normalize()
     {
-        CHECK_EQ(probability.rows(),256);
+        CHECK(probability.rows()>0);
         Eigen::VectorXd row_wise_sum = probability.rowwise().sum();
         probability.array().colwise() /= row_wise_sum.array();
         CHECK_NEAR(probability.row(0).sum(),1.0, 1e-4);

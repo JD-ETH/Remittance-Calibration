@@ -5,7 +5,7 @@ namespace remittance_calib
     BeamMappings Calibrator::run()
     {
         int count = 0;
-        while (e_step()>convergence_ && count < 5)
+        while (e_step()>convergence_ && count < 15)
         {
             double error = m_step();
             saveProbability("/home/guo104/data/prob"+std::to_string(count)+".txt",beam_model);
@@ -38,7 +38,7 @@ namespace remittance_calib
         // Init cell
         for (auto & cell_prob : cell_model)
         {
-            cell_prob = Eigen::Matrix<double,256,1>::Ones() * uniform_dist;
+            cell_prob = Eigen::Matrix<double,MAX_REMITTANCE_READING,1>::Ones() * uniform_dist;
         }
         LOG(INFO) << "Initialized Cell Probability as uniform " << cell_model.size();
 
@@ -50,7 +50,7 @@ namespace remittance_calib
 
         for (int beam_i = 0 ; beam_i < num_of_rings ; beam_i++)
         {
-            beam_model.emplace_back(std_var,epsilon);
+            beam_model.emplace_back(MAX_REMITTANCE_READING,std_var,epsilon);
         }
 
         LOG(INFO) << "Initialization completed";
@@ -72,9 +72,9 @@ namespace remittance_calib
         for (auto & cell : cell_model)
         {
             auto val = cell.maxCoeff();
-            for (uint i = 0 ; i < 256u ; i++)
+            for (uint i = 0 ; i < MAX_REMITTANCE_READING ; i++)
             {
-                if (cell(i)-val >=std::log(precision_)-std::log(256))
+                if (cell(i)-val >=std::log(precision_)-std::log(MAX_REMITTANCE_READING))
                 {
                     cell(i) = std::exp(cell(i)-val);
                 }
@@ -111,7 +111,7 @@ namespace remittance_calib
         BeamCountings countings(beam_model.size());
         for (auto & counting: countings)
         {
-            counting = BeamCounting(256,256);
+            counting = BeamCounting(MAX_REMITTANCE_READING,MAX_REMITTANCE_READING);
             counting.setZero();
         }
         for (const auto & m : measurements_)
@@ -122,7 +122,7 @@ namespace remittance_calib
         double diff = 0;
         for (uint i = 0 ; i < countings.size() ; i++)
         {
-            CHECK_EQ(countings.at(i).rows(), 256);
+            CHECK_EQ(countings.at(i).rows(), MAX_REMITTANCE_READING);
             beam_model.at(i) = BeamProbability(countings.at(i));
             diff += (beam_model.at(i).probability-buffered.at(i).probability).norm();
         }

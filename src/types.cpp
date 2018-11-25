@@ -5,26 +5,19 @@ namespace remittance_calib
 {
     BeamProbability::BeamProbability(BeamCounting in)
     {
-        CHECK_EQ(in.rows(),256);
+
         probability = in;
-        // Eigen::RowVectorXd col_wise_sum = probability.colwise().sum();
-        // for (int i = 0 ; i < 256 ; i++)
-        // {
-        //     if (col_wise_sum(i) == 0) col_wise_sum(i) =1;
-        // }
-        // probability.array().rowwise() /= col_wise_sum.array();
-        // CHECK_NEAR(probability.col(0).sum(),1.0, 1e-4);
         normalize();
         log_probability = probability.array().log().matrix();
 
     }
-    BeamProbability::BeamProbability(double var, double epsilon )
+    BeamProbability::BeamProbability(int size, double var, double epsilon )
     {
-        probability = Eigen::MatrixXd(256,256);
-        for (uint i = 0 ; i < 256u; i++)
+        probability = Eigen::MatrixXd(size,size);
+        for (int i = 0 ; i < size; i++)
         {
             PDF pdf(static_cast<double>(i),var);
-            for (uint j = 0 ; j < 256u ; j++)
+            for (int j = 0 ; j < size ; j++)
             {
                 probability(i,j) = pdf.at(static_cast<double> (j)) + epsilon;
             }
@@ -35,10 +28,9 @@ namespace remittance_calib
 
     BeamMapping BeamProbability::getMapping() const
     {
-        BeamMapping result(256);
+        BeamMapping result(probability.rows());
         CHECK_NEAR(probability.row(0).sum(),1.0,1e-4);
-        CHECK_EQ(probability.rows(),256);
-        for (uint i = 0 ; i < 256u ; i++)
+        for (uint i = 0 ; i < probability.rows() ; i++)
         {
             auto val = probability.col(i).maxCoeff(&result(i));
             if (val == 0) result(i) = i ;
