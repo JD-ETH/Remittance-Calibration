@@ -115,13 +115,13 @@ int main(int argc, char** argv)
 
             if (pt.range > options.correct_thresh || downsized >= 100)
             {
-                point.intensity = static_cast<float>(downsized)/257.0f;
+                point.intensity = static_cast<float>(downsized)/256.0f;
             }
             else
             {
                 CHECK(pt.ring < maps.size());
                 CHECK(maps.at(pt.ring).cols()>downsized);
-                point.intensity = static_cast<float>(maps.at(pt.ring)(downsized))/257.0f;
+                point.intensity = static_cast<float>(maps.at(pt.ring)(downsized))/256.0f;
             }
 
             CHECK(point.intensity < 1.0f) << "Converted intensity must smaller than 1";

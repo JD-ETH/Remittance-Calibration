@@ -88,7 +88,7 @@ namespace remittance_calib
         //std::vector<size_t> counter(257,0);
         for (const auto pt : cloud->points)
         {
-            int a = static_cast<int>(pt.intensity/256);
+            int a = static_cast<int>(pt.intensity/257);
             int b = static_cast<int>(pt.ring);
             int k = find_voxel(grid,pt.x,pt.y,pt.z);
             if (a>=100)
@@ -96,7 +96,7 @@ namespace remittance_calib
                 continue;
             }
             CHECK(k>=0) << "Did not find corresponding voxel";
-            CHECK(a<256 && a >=0) << "Measured intensity is wrong value";
+            CHECK(a<257 && a >=0) << "Measured intensity is wrong value";
             CHECK(b>=0) << "Ring index is wrong";
             results.emplace_back(a,b,k);
             // counter.at(a)++;
