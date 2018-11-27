@@ -78,7 +78,7 @@ struct PointXYZIR
     		(float, y, y)
     		(float, z, z)
   	        (unsigned char, planarity, planarity)
-  	        (unsigned char, ring, ring)
+  	        (unsigned char, ring, ring_number)
     		(unsigned short, intensity, intensity)
     		(float, incidence_angle, incidence_angle)
     		(float, range, range)
