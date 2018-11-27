@@ -111,7 +111,6 @@ int main(int argc, char** argv)
             point.y = pt.y;
             point.z = pt.z;
             point.curvature = static_cast<float>(pt.time);
-            LOG(INFO) << pt.intensity;
             int downsized = static_cast<int>(pt.intensity/257);
 
             if (pt.range > options.correct_thresh || downsized >= 100)
